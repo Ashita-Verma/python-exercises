@@ -1,0 +1,80 @@
+"""Functions to automate Conda airlines ticketing system."""
+
+
+def generate_seat_letters(number):
+    """Generate a series of letters for airline seats.
+
+    Parameters:
+        number (int): Total number of seat letters to be generated.
+
+    Returns:
+        generator: A generator that yields seat letters.
+
+    Note:
+        Seat letters are generated from A to D.
+        After D the sequence starts again with A.
+        For example: A, B, C, D, A, B
+
+    """
+
+    for total_seats in range(number):
+        yield chr(65 + (total_seats % 4))
+
+
+def generate_seats(number):
+    """Generate a series of identifiers for airline seats.
+
+    Parameters:
+        number (int): The total number of seats to be generated.
+
+    Returns:
+        generator: A generator that yields seat numbers.
+
+    Note:
+        A seat number consists of the row number and the seat letter.
+        There is no row 13, and each row has 4 seats.
+
+        Seats should be sorted from low to high.
+        For example: 3C, 3D, 4A, 4B
+
+    """
+
+    for seat_count in range(number):
+        row, seat = divmod(seat_count, 4)
+        yield f"{row + 1 + (row >= 12)}{chr(65 + seat)}"
+        
+
+
+def assign_seats(passengers):
+    """Assign seats to passengers.
+
+    Parameters:
+        passengers (list[str]): A list of strings containing names of passengers.
+
+    Returns:
+        dict: With passenger names as keys and seat numbers as values.
+        Example output: {"Adele": "1A", "Björk": "1B"}
+
+    """
+    assigned_seats = {}
+    generated_seats = generate_seats(len(passengers))
+    for passenger,seat in zip(passengers, generated_seats):
+        assigned_seats[passenger] = seat
+
+    return assigned_seats
+
+
+def generate_codes(seat_numbers, flight_id):
+    """Generate codes for a ticket.
+
+    Parameters:
+        seat_numbers (list[str]): A list of seat numbers.
+        flight_id (str): A string containing the flight identifier.
+
+    Returns:
+        generator: A generator that yields 12 character long ticket codes.
+
+    """
+    for seat in seat_numbers:
+        ticket = f"{seat}{flight_id}"
+        yield ticket.ljust(12,'0')
